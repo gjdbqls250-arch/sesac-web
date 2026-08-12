@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>메디큐브 K뷰티 인플루언서 대시보드</title>
+<meta name="description" content="일본 유튜브 K뷰티 협업 영상 데이터로 협업 후보와 경쟁사 협업 현황을 비교하는 메디큐브 마케터용 대시보드">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brandmark">
+    <span class="name"><em>메디큐브</em> 인플루언서 대시보드</span>
+    <span class="sub">일본 유튜브 K뷰티 협업 영상, 6개 브랜드 비교</span>
+  </div>
+  <div class="topbar-meta">
+    <span id="meta-period"></span>
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="테마 전환" title="라이트/다크 전환">◐</button>
+  </div>
+</header>
+
+<main id="app" aria-busy="true">
+  <div class="empty-state" id="loading-state">데이터를 불러오는 중...</div>
+</main>
+
+<template id="tpl-main">
+  <section class="block" id="block-baseline">
+    <div class="block-head">
+      <h2>메디큐브 현황</h2>
+      <span class="block-note">6개 브랜드 중 순위 기준입니다. 참여율과 조회수는 중앙값입니다.</span>
+    </div>
+    <div class="card card-baseline">
+      <p class="baseline-summary" id="baseline-summary"></p>
+      <div class="stat-grid" id="baseline-stats"></div>
+    </div>
+  </section>
+
+  <section class="block" id="block-compare">
+    <div class="block-head">
+      <h2>경쟁사 협업 현황</h2>
+      <span class="block-note">메디큐브는 강조 표시됩니다</span>
+    </div>
+    <div class="card">
+      <div class="table-scroll">
+        <table id="brand-table">
+          <thead>
+            <tr>
+              <th>브랜드</th>
+              <th>영상 수</th>
+              <th>채널 수</th>
+              <th>영상/채널</th>
+              <th>참여율 중앙값</th>
+              <th>조회수 중앙값</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="block-head">
+        <h2 style="font-size:14px;">협업 채널 수 × 참여율 중앙값</h2>
+        <span class="block-note">X축은 협업 채널 수(다수 소형 vs 소수 대형), Y축은 참여율 중앙값입니다.</span>
+      </div>
+      <div class="scatter-wrap">
+        <svg class="scatter" id="brand-scatter" viewBox="0 0 760 420" preserveAspectRatio="xMinYMin meet" role="img" aria-label="브랜드별 협업 채널 수와 참여율 중앙값 산점도"></svg>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="block-head">
+        <h2 style="font-size:14px;">구독자 규모대 분포</h2>
+        <span class="block-note">브랜드별 협업 영상이 어느 티어에 몰려 있는지</span>
+      </div>
+      <div class="tier-legend" id="tier-legend"></div>
+      <div class="tier-rows" id="tier-rows"></div>
+    </div>
+
+    <div class="card">
+      <button type="button" class="removed-toggle" id="stdz-toggle" aria-expanded="false">
+        이 순위가 채널 구성 탓인지 확인했습니다 <span class="arrow">▾</span>
+      </button>
+      <div class="removed-panel" id="stdz-panel">
+        <p class="block-note" style="margin:12px 0;">
+          브랜드마다 협업하는 채널의 구독자 규모대 구성이 다르므로, 전체 영상의 규모대 비중을 "표준 구성"으로 놓고
+          브랜드별 참여율을 재가중한 값입니다. 참여율이 있는 영상만 사용했습니다.
+        </p>
+        <div class="table-scroll">
+          <table id="stdz-compare-table">
+            <thead>
+              <tr>
+                <th>브랜드</th>
+                <th>원본 참여율 중앙값</th>
+                <th>규모보정 참여율</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div class="block-head" style="margin-top:18px;">
+          <h2 style="font-size:13px;">브랜드 × 규모대 참여율 매트릭스</h2>
+          <span class="block-note">셀 값은 참여율 중앙값과 표본수(n)입니다. 표본 10건 미만은 흐리게 표시합니다.</span>
+        </div>
+        <div class="table-scroll">
+          <table id="stdz-matrix-table">
+            <thead>
+              <tr id="stdz-matrix-head"><th>브랜드</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="block-note" style="margin-top:8px;">
+          표본 10건 미만 구간은 신뢰도가 낮습니다. Round Lab과 Torriden의 보정값은 소표본이 증폭된 결과이므로 해석에 주의가 필요합니다.
+        </p>
+        <p class="baseline-summary" id="stdz-conclusion" style="margin-top:12px;"></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="block-lists">
+    <div class="tablist" role="tablist" aria-label="목록 보기">
+      <button type="button" role="tab" id="tab-videos" aria-selected="true" aria-controls="panel-videos" tabindex="0" class="tab-btn">
+        영상 탐색 <span class="tab-count" id="tab-videos-count"></span>
+      </button>
+      <button type="button" role="tab" id="tab-channels" aria-selected="false" aria-controls="panel-channels" tabindex="-1" class="tab-btn">
+        협업 후보 채널 <span class="tab-count" id="tab-channels-count"></span>
+      </button>
+    </div>
+
+    <div role="tabpanel" id="panel-videos" aria-labelledby="tab-videos" tabindex="0">
+      <p class="block-note" style="margin:10px 0;">
+        제목 클릭 시 유튜브로 이동합니다. 한국어 번역은 기계 번역이며 뉘앙스가 다를 수 있습니다.
+      </p>
+      <div class="active-filter-bar" id="video-stat-filter-banner" hidden>
+        <span id="video-stat-filter-text"></span>
+        <button type="button" class="clear-filter-btn" id="video-stat-filter-clear">해제</button>
+      </div>
+      <div class="explorer-toolbar">
+        <div class="filters">
+          <div class="filter-group">
+            <span class="fg-label">성과 기준</span>
+            <div class="segmented" id="metric-toggle" role="group" aria-label="성과 기준 선택">
+              <button type="button" data-metric="engagement" aria-pressed="true">참여율</button>
+              <button type="button" data-metric="vsExpected" aria-pressed="false">기대치 대비</button>
+              <button type="button" data-metric="views" aria-pressed="false">조회수</button>
+            </div>
+          </div>
+        </div>
+        <div class="filters">
+          <div class="filter-group" id="video-brand-filter">
+            <span class="fg-label">브랜드</span>
+          </div>
+          <div class="filter-group">
+            <span class="fg-label">규모대</span>
+            <select class="native-select" id="video-tier-filter">
+              <option value="">전체</option>
+              <option value="nano">나노 (1천 미만)</option>
+              <option value="micro">마이크로 (1천~1만)</option>
+              <option value="mid">미드 (1만~10만)</option>
+              <option value="macro">매크로 (10만~50만)</option>
+              <option value="mega">메가 (50만 이상)</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <span class="fg-label">기간</span>
+            <select class="native-select" id="video-period-filter">
+              <option value="">전체</option>
+              <option value="24">최근 2년</option>
+              <option value="12">최근 1년</option>
+              <option value="6">최근 6개월</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="check-label"><input type="checkbox" id="video-shorts-exclude"> 쇼츠 제외</label>
+          </div>
+          <div class="filter-group">
+            <label class="check-label"><input type="checkbox" id="video-outlier-exclude"> 구독자 대비 이상 11건 제외</label>
+          </div>
+        </div>
+        <div class="filters" id="video-theme-filter-row">
+          <div class="filter-group" id="video-theme-filter">
+            <span class="fg-label">콘텐츠 성향</span>
+          </div>
+        </div>
+        <div class="filters" id="video-tag-filter-row">
+          <div class="filter-group" id="video-tag-filter" style="width:100%;">
+            <span class="fg-label">태그</span>
+          </div>
+        </div>
+        <div class="active-filter-bar" id="video-tag-active" hidden>
+          <span class="fg-label">태그 필터</span>
+          <span class="chip-toggle" id="video-tag-active-chip" aria-pressed="true"></span>
+          <button type="button" class="clear-filter-btn" id="video-tag-clear">해제</button>
+        </div>
+        <p class="block-note" id="vsexpected-note" style="display:none; margin:0;">
+          기대치 대비는 구독자 규모 중앙값과 비교한 배수입니다. 구독자 1,000명 미만 채널은 분모가 작아 배수가 과장되므로, 해당하는 11건을 '구독자 대비 이상'으로 표시했습니다.
+        </p>
+        <div class="result-count" id="video-count"></div>
+      </div>
+      <div class="card">
+        <div class="table-scroll">
+          <table id="video-table">
+            <thead>
+              <tr>
+                <th title="원제 아래 줄은 기계 번역입니다. 뉘앙스가 다를 수 있습니다.">제목</th>
+                <th>채널</th>
+                <th>브랜드</th>
+                <th class="col-num">구독자</th>
+                <th class="col-num" title="조회수 막대는 제곱근 스케일입니다. 최대값이 중앙값의 수백 배라 선형 막대는 비교에 도움이 되지 않습니다.">조회수</th>
+                <th id="video-metric-head" class="th-sortable active col-num">성과 <span class="arrow">▼</span></th>
+                <th>게시일</th>
+              </tr>
+            </thead>
+            <tbody id="video-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="pagination" id="video-pagination"></div>
+    </div>
+
+    <div role="tabpanel" id="panel-channels" aria-labelledby="tab-channels" tabindex="0" hidden>
+      <div class="active-filter-bar" id="channel-stat-filter-banner" hidden>
+        <span id="channel-stat-filter-text"></span>
+        <button type="button" class="clear-filter-btn" id="channel-stat-filter-clear">해제</button>
+      </div>
+      <p class="baseline-summary" id="channels-opportunity-summary" style="margin:10px 0;"></p>
+      <p class="block-note" id="channel-insight" style="margin:0 0 10px;" hidden></p>
+      <div class="filters">
+        <div class="filter-group">
+          <span class="fg-label">규모대</span>
+          <select class="native-select" id="channel-tier-filter">
+            <option value="">전체</option>
+            <option value="nano">나노 (1천 미만)</option>
+            <option value="micro">마이크로 (1천~1만)</option>
+            <option value="mid">미드 (1만~10만)</option>
+            <option value="macro">매크로 (10만~50만)</option>
+            <option value="mega">메가 (50만 이상)</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <span class="fg-label">최근 활동</span>
+          <select class="native-select" id="channel-recent-filter">
+            <option value="">전체</option>
+            <option value="12">최근 1년 이내</option>
+            <option value="6">최근 6개월 이내</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="check-label"><input type="checkbox" id="channel-newonly-filter"> 메디큐브 미협업만 보기</label>
+        </div>
+        <div class="filter-group">
+          <label class="check-label"><input type="checkbox" id="channel-minvideo-filter" checked> 영상 2건 이상만 보기 (표본 1건 제외)</label>
+        </div>
+        <div class="filter-group" id="channel-official-filter-group" hidden>
+          <label class="check-label"><input type="checkbox" id="channel-official-filter"> 공식 계정 포함</label>
+        </div>
+        <div class="filter-group" id="channel-dermo-filter-group" hidden>
+          <span class="fg-label">더모 성향</span>
+          <select class="native-select" id="channel-dermo-filter">
+            <option value="">전체</option>
+            <option value="0.7">70% 이상</option>
+            <option value="0.5">50% 이상</option>
+            <option value="0.3">30% 이상</option>
+          </select>
+        </div>
+        <div class="result-count" id="channel-count"></div>
+      </div>
+      <div class="filters" id="channel-candidate-row" hidden>
+        <button type="button" class="chip-toggle" id="channel-candidate-btn">더모 70%+ 미협업 후보만 보기</button>
+      </div>
+      <p class="block-note" id="channel-filter-banner" style="margin:8px 0;"></p>
+      <p class="block-note" id="dermo-note" style="margin:0 0 10px;" hidden>
+        더모 성향은 성분·과학 또는 피부고민 콘텐츠의 비중입니다. 제목 키워드로 추정한 값이라 실제와 다를 수 있습니다.
+      </p>
+      <div class="card">
+        <div class="table-scroll">
+          <table id="channel-table">
+            <thead>
+              <tr>
+                <th>채널명</th>
+                <th class="col-num th-sortable" data-sort="videoCount">영상 수 <span class="arrow">▼</span></th>
+                <th>협업 브랜드</th>
+                <th class="col-num">구독자</th>
+                <th class="th-sortable col-num active" data-sort="engagementMedian">참여율 중앙값 <span class="arrow">▼</span></th>
+                <th class="th-sortable col-num" data-sort="dermoRatio" id="channel-dermo-head" hidden title="성분·과학 또는 피부고민 콘텐츠의 비중입니다. 제목 키워드로 추정한 값이라 실제와 다를 수 있습니다.">더모 성향 <span class="arrow">▼</span></th>
+                <th class="col-num th-sortable" data-sort="prCount" id="channel-pr-head" hidden>광고 협업 <span class="arrow">▼</span></th>
+                <th id="channel-tags-head" hidden>주요 태그</th>
+                <th>최근 활동일</th>
+              </tr>
+            </thead>
+            <tbody id="channel-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="pagination" id="channel-pagination"></div>
+    </div>
+  </section>
+
+  <section class="block" id="block-removed">
+    <div class="block-head">
+      <h2>데이터 정제</h2>
+      <span class="block-note">원본 486건 중 20건(4.1%)을 제거한 근거를 공개합니다</span>
+    </div>
+    <button type="button" class="removed-toggle" id="removed-toggle" aria-expanded="false">
+      제외된 20건 보기 <span class="arrow">▾</span>
+    </button>
+    <div class="card removed-panel" id="removed-panel">
+      <div class="table-scroll">
+        <table id="removed-table">
+          <thead>
+            <tr>
+              <th>제목</th>
+              <th>채널</th>
+              <th>브랜드</th>
+              <th>조회수</th>
+              <th>제외 사유</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</template>
+
+<footer>
+  데이터는 일본 유튜브 K뷰티 브랜드 협업 영상 스냅샷입니다. 정적 페이지이며 실시간 연동은 없습니다.
+  구독자 대비 지표(참여율)는 사용하지 않으며, 값이 큰 소수 채널의 왜곡을 피하기 위해 평균 대신 중앙값만 사용합니다.
+</footer>
+
+<div class="tooltip" id="tooltip" role="tooltip"></div>
+
+<script src="assets/app.js"></script>
+</body>
+</html>

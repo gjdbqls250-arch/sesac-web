@@ -1,0 +1,1158 @@
+/* ==========================================================================
+   K뷰티 인플루언서 대시보드 — 디자인 토큰
+   메디큐브(themedicube.co.kr) 실측 디자인 토큰 적용: 1260px 컨테이너, 20px 카드
+   모서리, 0.8px 헤어라인 보더, 자간 -0.5px/-1px, weight 400·500 중심(700 미사용),
+   그림자 한 종류만(0 4px 25px rgba(0,0,0,.1), 툴팁 전용), 필 컨트롤(선택=검정).
+   APR Red(#E6002A)는 데이터에서 메디큐브를 식별하는 용도로만 쓰고 UI 조작 요소의
+   선택 상태에는 쓰지 않는다(선택 = 검정). 부동산 대시보드(블루)와 분리된 정체성.
+
+   대비 검증 (직접 계산, WCAG 상대휘도 공식):
+     라이트  3E3A39 on FFFFFF        = 11.24:1  (본문)
+     라이트  3E3A39 on F8F6F6(page)  = 10.43:1  (페이지 바탕 위 본문)
+     라이트  6B6665 on FFFFFF        =  5.65:1  (보조 텍스트)
+     라이트  6B6665 on F8F6F6(page)  =  5.25:1  (보조 텍스트, 페이지 바탕)
+     라이트  D60027 on FFFFFF        =  5.40:1  (액센트 텍스트/선 — 표면 흰색)
+     라이트  D60027 on F1F1F1(表헤더)=  4.78:1  (액센트 텍스트/선 — 회색 표면, 가장 낮은 값)
+     라이트  D60027 on F8F6F6(page)  =  5.02:1  (액센트 텍스트/선 — 페이지 바탕)
+     라이트  FFFFFF on E6002A        =  4.77:1  (칠 위 흰 텍스트)
+     라이트  3E3A39 on F4ABAF        =  6.04:1  (핑크 면 위 먹색 텍스트)
+     라이트  FFFFFF on 1A1817(선택)  = 17.69:1  (검정 선택 칩 위 흰 텍스트)
+     다크    F5F1F0 on 2A2626        = 13.34:1  (본문)
+     다크    B8B2B1 on 2A2626        =  7.15:1  (보조 텍스트)
+     다크    F4ABAF on 2A2626        =  8.04:1  (액센트 텍스트/선 — 다크는 40% 틴트 사용)
+     다크    FFFFFF on E6002A        =  4.77:1  (칠은 다크에서도 E6002A 유지, 글자는 흰색)
+     다크    221E1D on F5F1F0(선택)  = 14.73:1  (다크 선택 칩 — 밝은 칩 + 어두운 글자로 반전)
+     ※ APR Red를 회색/어두운 표면 위에 "텍스트"로 직접 쓰면 4.5:1 미달 구간이 있어
+       라이트는 D60027(진한 레드), 다크는 F4ABAF(40% 틴트)를 --accent-text로 쓰고,
+       칠(버튼 배경·막대·점)만 원색 --accent(E6002A)를 유지한다.
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* 페이지 바탕은 APR Black과 같은 계열의 아주 옅은 따뜻한 회색, 카드는 순백으로 면을 분리한다.
+     채도는 거의 0 (R-B 채널差 2) — "화장품=핑크" 클리셰를 피한다. */
+  --page-bg: #F8F6F6;
+  --paper: #F8F6F6;
+  --surface: #FFFFFF;
+  --surface-2: #F1F1F1;      /* CI 외 보조 중성 배경 (표 헤더 등) */
+  --ink: #3E3A39;            /* APR Black — 순수 검정 아님 */
+  --ink-muted: #6B6665;      /* 5.65:1 on white */
+  --border: #DBDBDB;         /* 메디큐브 실측 헤어라인, 0.8px로 사용 */
+  --border-strong: #CFCBCB;  /* 표/태그 등 옅은 경계용 */
+  --border-btn: #7F7F7F;     /* 메디큐브 보조 버튼 보더 실측값 — 필 컨트롤 전용 */
+
+  --accent: #E6002A;         /* APR Red — 데이터에서 메디큐브 식별 전용(칠) */
+  --accent-text: #D60027;    /* 텍스트용 진한 레드 — surface-2(F1F1F1) 위 4.78:1, paper 위 5.02:1 (직접 계산) */
+  --accent-ink: #FFFFFF;     /* 채움 위에 얹는 텍스트 */
+  --accent-soft: #F4ABAF;    /* APR Red 40% — 강조 면(카드 배경·선택 행·후광) */
+  --accent-wash: rgba(230, 0, 42, 0.07); /* 표 행 등 옅은 틴트 */
+
+  /* UI 조작 요소(탭·토글·버튼)의 선택 상태 — 메디큐브 실측: 검정 배경 + 흰 글자 */
+  --control-selected-bg: #1A1817;
+  --control-selected-ink: #FFFFFF;
+
+  --neutral-mark: #8A8686;   /* 경쟁사 마크(도형) 전용 — 3:1 이상, 텍스트 금지 */
+  --neutral-border: #CFCBCB;
+  --neutral-bg: #EFEDED;
+
+  /* 표 안 인라인 막대. 텍스트 위에 깔리므로 저채도로 유지 (숫자 대비 4.5:1+ 확보됨, 직접 계산 완료) */
+  --bar-accent: rgba(230, 0, 42, 0.20);
+  --bar-neutral: rgba(138, 134, 134, 0.18);
+
+  /* 구독자 규모대 순서형 램프 (nano -> mega, 밝음->어두움) */
+  --tier-nano:  #FD9BAD;
+  --tier-micro: #FD5E7B;
+  --tier-mid:   #FB1841;
+  --tier-macro: #C90327;
+  --tier-mega:  #830219;
+
+  --on-soft: #3E3A39;        /* accent-soft(F4ABAF, 항상 밝은 핑크) 위에 얹는 고정 먹색 텍스트 */
+
+  --good: #1E7A46;
+  /* 메디큐브 실측 그림자 — 한 종류만, 정말 떠 있는 요소(툴팁)에만 사용 */
+  --shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+  --radius-lg: 20px;         /* 카드·패널 등 큰 면 */
+  --radius-pill: 999px;      /* 버튼·탭·칩 등 필 컨트롤 */
+  --radius-xs: 3px;          /* 막대·트랙 등 작은 요소 */
+  /* 이전 토큰 이름 호환 */
+  --radius: var(--radius-lg);
+  --radius-sm: var(--radius-xs);
+
+  --font-sans: 'Pretendard', -apple-system, 'Hiragino Sans', 'Yu Gothic', 'Meiryo', 'Malgun Gothic', sans-serif;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #2A2626;
+    --surface: #322D2D;
+    --surface-2: #383232;
+    --ink: #F5F1F0;
+    --ink-muted: #B8B2B1;
+    --border: #423D3D;          /* 다크에서 헤어라인이 과해지지 않도록 표면색에 가깝게 */
+    --border-strong: #5A5353;
+    --border-btn: #6B6564;
+
+    --accent: #E6002A;          /* 채움은 다크에서도 동일, 글자는 흰색으로 얹는다 */
+    --accent-text: #F4ABAF;     /* 텍스트/선은 40% 틴트 (8.04:1) */
+    --accent-ink: #FFFFFF;
+    --accent-soft: #F4ABAF;
+    --accent-wash: rgba(230, 0, 42, 0.16);
+
+    /* 다크에서는 밝음이 "가장 진한 값"이 되므로 선택 상태를 반전한다 (구조는 동일: 가장 강한 대비 = 선택) */
+    --control-selected-bg: #F5F1F0;
+    --control-selected-ink: #221E1D;
+
+    --neutral-mark: #9A9494;
+    --neutral-border: #5A5353;
+    --neutral-bg: #3A3434;
+
+    --bar-accent: rgba(230, 0, 42, 0.28);
+    --bar-neutral: rgba(154, 148, 148, 0.24);
+
+    --tier-nano:  #C70528;
+    --tier-micro: #F90633;
+    --tier-mid:   #FA385B;
+    --tier-macro: #FB748D;
+    --tier-mega:  #FDB4C2;
+
+    --on-soft: #3E3A39;
+
+    --good: #57C287;
+    --shadow: 0 4px 25px rgba(0, 0, 0, 0.35);
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper: #2A2626;
+  --surface: #322D2D;
+  --surface-2: #383232;
+  --ink: #F5F1F0;
+  --ink-muted: #B8B2B1;
+  --border: #423D3D;
+  --border-strong: #5A5353;
+  --border-btn: #6B6564;
+
+  --accent: #E6002A;
+  --accent-text: #F4ABAF;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #F4ABAF;
+  --accent-wash: rgba(230, 0, 42, 0.16);
+
+  --control-selected-bg: #F5F1F0;
+  --control-selected-ink: #221E1D;
+
+  --neutral-mark: #9A9494;
+  --neutral-border: #5A5353;
+  --neutral-bg: #3A3434;
+
+  --bar-accent: rgba(230, 0, 42, 0.28);
+  --bar-neutral: rgba(154, 148, 148, 0.24);
+
+  --tier-nano:  #C70528;
+  --tier-micro: #F90633;
+  --tier-mid:   #FA385B;
+  --tier-macro: #FB748D;
+  --tier-mega:  #FDB4C2;
+
+  --on-soft: #3E3A39;
+
+  --good: #57C287;
+  --shadow: 0 4px 25px rgba(0, 0, 0, 0.35);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  letter-spacing: -0.5px; /* 메디큐브 실측: 본문 자간 */
+}
+
+body {
+  min-width: 320px;
+  max-width: 100vw;
+}
+
+a { color: var(--accent-text); }
+
+button, select, input {
+  font-family: inherit;
+  letter-spacing: inherit;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------- header */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px clamp(14px, 4vw, 32px);
+  border-bottom: 0.8px solid var(--border);
+  background: var(--surface);
+}
+
+.brandmark {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.brandmark .name {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.brandmark .name em {
+  font-style: normal;
+  color: var(--accent-text);
+}
+
+.brandmark .sub {
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+.topbar-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--ink-muted);
+  flex-shrink: 0;
+}
+
+.theme-toggle {
+  border: 0.8px solid var(--border-btn);
+  background: transparent;
+  color: var(--ink);
+  border-radius: var(--radius-pill);
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.theme-toggle:hover { border-color: var(--ink); }
+
+/* ------------------------------------------------------------------ main */
+
+main {
+  max-width: 1260px; /* 메디큐브 실측 컨테이너 폭 */
+  margin: 0 auto;
+  padding: 32px clamp(14px, 4vw, 40px) 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 72px; /* 블록 사이 세로 간격 60~100px */
+}
+
+section.block {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+.block-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.block-head h2 {
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: -1px;
+  margin: 0;
+}
+
+.block-head .block-note {
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+.card {
+  background: var(--surface);
+  border: 0.8px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  min-width: 0;
+}
+
+/* --------------------------------------------------------- 5.1 baseline */
+
+.card-baseline {
+  border-top: 2px solid var(--accent); /* 자사 블록 표시 — 옅은 헤어라인, 면 전체 틴트보다 절제된 쪽 */
+}
+
+.baseline-summary {
+  font-size: 15px;
+  line-height: 1.6;
+  padding: 16px 18px;
+  background: var(--accent-soft);
+  color: var(--on-soft);
+  border: 0.8px solid var(--accent);
+  border-radius: var(--radius-lg);
+  margin: 0 0 18px;
+}
+
+.baseline-summary strong { color: var(--on-soft); font-weight: 600; }
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 720px) {
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.stat-tile {
+  border: 0.8px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  /* 버튼 기본 스타일 리셋 — 카드처럼 보이되 클릭 가능함을 알려야 한다 */
+  width: 100%;
+  background: var(--surface);
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 150ms ease-out, border-color 150ms ease-out;
+}
+
+.stat-tile:hover {
+  background: var(--surface-2);
+  border-color: var(--border-btn);
+}
+
+.stat-tile:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.stat-tile-hint {
+  font-size: 13px;
+  color: var(--ink-muted);
+  margin-top: 2px;
+}
+
+.stat-tile .label {
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+.stat-tile .value {
+  font-size: 38px;
+  font-weight: 500;
+  font-variant-numeric: proportional-nums;
+  letter-spacing: -1px;
+  line-height: 1.15;
+}
+
+.stat-tile .rank {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: fit-content;
+}
+
+.stat-tile .rank .rank-num {
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+.stat-tile .rank.rank-1::before { content: "1위"; display:none; }
+
+/* --------------------------------------------------------------- table */
+
+.table-scroll {
+  overflow-x: auto;
+  overflow-y: hidden; /* 둥근 모서리를 헤더 사각 배경이 뚫고 나오지 않도록 클리핑 */
+  border: 0.8px solid var(--border);
+  border-radius: var(--radius-lg);
+  -webkit-overflow-scrolling: touch;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 560px;
+  font-size: 15px;
+}
+
+thead th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--ink-muted);
+  font-size: 13px;
+  padding: 12px 14px;
+  border-bottom: 0.8px solid var(--border);
+  background: var(--surface-2);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+}
+
+thead th.col-num, tbody td.col-num {
+  text-align: right;
+}
+
+/* 표 안 인라인 막대: 값의 크기를 셀 안 배경 막대로도 보여준다 (숫자는 그대로 위에 읽힌다) */
+.cell-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 22px;
+}
+
+.cell-bar .bar-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: var(--radius-xs);
+  transition: width 200ms ease-out, background-color 200ms ease-out;
+}
+
+.cell-bar .bar-fill.bar-accent { background: var(--bar-accent); }
+.cell-bar .bar-fill.bar-neutral { background: var(--bar-neutral); }
+
+.cell-bar .bar-text {
+  position: relative;
+  z-index: 1;
+  padding-right: 4px;
+}
+
+tbody td {
+  padding: 18px 14px;
+  border-bottom: 0.8px solid var(--border);
+  vertical-align: middle;
+  font-variant-numeric: tabular-nums;
+  font-weight: 400;
+}
+
+tbody tr:last-child td { border-bottom: none; }
+
+tbody tr:hover {
+  background: var(--surface-2);
+}
+
+tbody tr.is-medicube {
+  background: var(--accent-wash);
+}
+
+tbody tr.is-medicube:hover {
+  background: var(--accent-wash);
+  filter: brightness(0.97);
+}
+
+tbody tr.is-medicube td:first-child {
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.th-sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.th-sortable .arrow {
+  display: inline-block;
+  margin-left: 4px;
+  opacity: 0.5;
+}
+
+.th-sortable.active .arrow { opacity: 1; color: var(--ink); }
+
+.cell-title {
+  max-width: 280px;
+}
+
+.cell-title a {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.cell-title a:hover { color: var(--accent-text); text-decoration: underline; }
+
+.muted { color: var(--ink-muted); }
+
+.na {
+  color: var(--ink-muted);
+  font-style: normal;
+  font-size: 13px;
+  border: 0.8px dashed var(--border-strong);
+  border-radius: var(--radius-xs);
+  padding: 1px 6px;
+  white-space: nowrap;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+
+.badge-accent {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* 신규 후보 등 "정보성 강조" 배지 — 메디큐브 데이터가 아니므로 레드를 쓰지 않는다 */
+.badge-ink {
+  background: var(--ink);
+  color: var(--surface);
+}
+
+.badge-outline {
+  background: transparent;
+  border: 0.8px solid var(--border-btn);
+  color: var(--ink-muted);
+}
+
+.badge-warn {
+  background: var(--surface-2);
+  border: 0.8px solid var(--border-strong);
+  color: var(--ink-muted);
+}
+
+.chip-brand {
+  display: inline-block;
+  font-size: 13px;
+  padding: 1px 8px;
+  border-radius: var(--radius-pill);
+  border: 0.8px solid var(--border-strong);
+  color: var(--ink-muted);
+  margin: 1px 2px 1px 0;
+}
+
+.chip-brand.chip-medicube {
+  border-color: var(--accent-text);
+  color: var(--accent-text);
+  font-weight: 600;
+  background: var(--accent-wash);
+}
+
+/* -------------------------------------------------------------- filters */
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  padding: 16px 18px;
+  background: var(--surface-2);
+  border: 0.8px solid var(--border);
+  border-radius: var(--radius-lg);
+  font-size: 13px;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filter-group .fg-label {
+  color: var(--ink-muted);
+  font-size: 13px;
+  margin-right: 2px;
+}
+
+.chip-toggle {
+  border: 0.8px solid var(--border-btn);
+  background: transparent;
+  color: var(--ink);
+  border-radius: var(--radius-pill);
+  padding: 6px 14px;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  line-height: 1.3;
+}
+
+/* 선택 상태 = 검정. 레드는 데이터(메디큐브 식별) 전용으로 남겨둔다 */
+.chip-toggle[aria-pressed="true"] {
+  background: var(--control-selected-bg);
+  border-color: var(--control-selected-bg);
+  color: var(--control-selected-ink);
+  font-weight: 500;
+}
+
+select.native-select {
+  border: 0.8px solid var(--border-btn);
+  background: transparent;
+  color: var(--ink);
+  border-radius: var(--radius-pill);
+  padding: 7px 12px;
+  font-size: 14px;
+}
+
+label.check-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.segmented {
+  display: inline-flex;
+  border: 0.8px solid var(--border-btn);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.segmented button {
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  padding: 9px 16px;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  border-right: 0.8px solid var(--border-btn);
+}
+
+.segmented button:last-child { border-right: none; }
+
+.segmented button[aria-pressed="true"] {
+  background: var(--control-selected-bg);
+  color: var(--control-selected-ink);
+  font-weight: 500;
+}
+
+/* ------------------------------------------------------------ scatter */
+
+.scatter-wrap {
+  overflow-x: auto;
+}
+
+svg.scatter {
+  display: block;
+  width: 100%;
+  min-width: 720px;
+  height: auto;
+}
+
+svg.scatter text {
+  font-family: var(--font-sans);
+  fill: var(--ink);
+  letter-spacing: -0.3px;
+}
+
+svg.scatter .axis-label {
+  fill: var(--ink-muted);
+  font-size: 13px;
+}
+
+svg.scatter .axis-title {
+  fill: var(--ink-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+svg.scatter .grid-line {
+  stroke: var(--border);
+  stroke-width: 0.8;
+}
+
+svg.scatter .pt-dot {
+  stroke: var(--surface);
+  stroke-width: 2;
+  transition: cx 200ms ease-out, cy 200ms ease-out, r 200ms ease-out, fill 200ms ease-out;
+}
+
+svg.scatter .pt-label {
+  transition: x 200ms ease-out, y 200ms ease-out, fill 200ms ease-out;
+}
+
+svg.scatter .pt-halo {
+  transition: cx 200ms ease-out, cy 200ms ease-out;
+}
+
+svg.scatter .pt-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+svg.scatter .pt-hit { fill: transparent; cursor: pointer; }
+
+/* --------------------------------------------------------- tier bars */
+
+.tier-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  font-size: 13px;
+  color: var(--ink-muted);
+  margin-bottom: 10px;
+}
+
+.tier-legend .sw {
+  display: inline-block;
+  width: 10px; height: 10px;
+  border-radius: var(--radius-xs);
+  margin-right: 5px;
+  vertical-align: -1px;
+}
+
+.tier-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tier-row {
+  display: grid;
+  grid-template-columns: 130px 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+
+@media (max-width: 560px) {
+  .tier-row { grid-template-columns: 90px 1fr auto; }
+}
+
+.tier-row .tier-total {
+  font-size: 13px;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+.tier-row .tr-label {
+  font-size: 15px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-left: 10px;
+  border-left: 2px solid transparent;
+}
+
+.tier-row.is-medicube .tr-label {
+  color: var(--accent-text);
+  font-weight: 600;
+  border-left-color: var(--accent);
+}
+
+.tier-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.tier-bar {
+  display: flex;
+  height: 30px;
+  border-radius: var(--radius-xs);
+  overflow: hidden;
+  background: var(--surface-2);
+  min-width: 160px;
+}
+
+/* 세그먼트 안에 못 넣은 숫자까지 포함해 5개 티어 수치를 항상 전부 보여준다 */
+.tier-breakdown {
+  font-size: 13px;
+  color: var(--ink-muted);
+  line-height: 1.5;
+}
+
+.tier-breakdown-num {
+  color: var(--ink);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.tier-bar .seg {
+  height: 100%;
+  position: relative;
+  transition: width 200ms ease-out, background-color 200ms ease-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tier-bar .seg + .seg { margin-left: 2px; }
+
+.tier-bar .seg-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #FFFFFF;
+  white-space: nowrap;
+}
+
+/* 밝은 세그먼트(나노·마이크로)는 흰 글자 대비가 부족해 먹색으로 뒤집는다 (직접 계산, 4.5:1 이상) */
+.tier-bar .seg-light .seg-label { color: var(--on-soft); }
+
+/* ---------------------------------------------------------------- tabs */
+/* 메디큐브 실측: 필 형태, 선택 = 검정 배경 + 흰 글자, 비선택 = 투명 + 0.8px 보더 */
+
+.tablist {
+  display: flex;
+  gap: 8px;
+}
+
+.tab-btn {
+  border: 0.8px solid var(--border-btn);
+  background: transparent;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 400;
+  padding: 11px 22px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+.tab-btn[aria-selected="true"] {
+  background: var(--control-selected-bg);
+  border-color: var(--control-selected-bg);
+  color: var(--control-selected-ink);
+  font-weight: 500;
+}
+
+.tab-btn .tab-count {
+  font-weight: 400;
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+.tab-btn[aria-selected="true"] .tab-count { color: var(--control-selected-ink); opacity: 0.8; }
+
+[role="tabpanel"][hidden] { display: none; }
+
+/* ----------------------------------------------------------- pagination */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.pagination button {
+  border: 0.8px solid var(--border-btn);
+  background: transparent;
+  color: var(--ink);
+  border-radius: var(--radius-pill);
+  min-width: 36px;
+  height: 36px;
+  padding: 0 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  color: var(--ink-muted);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.pagination button[aria-current="true"] {
+  background: var(--control-selected-bg);
+  border-color: var(--control-selected-bg);
+  color: var(--control-selected-ink);
+  font-weight: 500;
+}
+
+/* -------------------------------------------------------------- list */
+
+.explorer-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.result-count {
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+.na-group-head td {
+  background: var(--surface-2);
+  color: var(--ink-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* --------------------------------------------------------- removed */
+
+.removed-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0.8px solid var(--border-btn);
+  background: transparent;
+  color: var(--ink);
+  border-radius: var(--radius-pill);
+  padding: 11px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  width: fit-content;
+}
+
+.removed-toggle:hover { border-color: var(--ink); }
+
+.removed-panel {
+  display: none;
+  margin-top: 10px;
+}
+
+.removed-panel.open { display: block; }
+
+.removed-panel .reason {
+  color: var(--ink-muted);
+}
+
+/* ------------------------------------------------------------- footer */
+
+footer {
+  max-width: 1260px;
+  margin: 0 auto;
+  padding: 0 clamp(14px, 4vw, 40px) 40px;
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+/* ----------------------------------------------------------- tooltip */
+
+.tooltip {
+  position: fixed;
+  pointer-events: none;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 13px;
+  padding: 8px 12px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow); /* 대시보드에서 그림자를 쓰는 유일한 자리 — 정말 떠 있는 요소 */
+  z-index: 50;
+  max-width: 240px;
+  line-height: 1.4;
+  opacity: 0;
+  transition: opacity 0.08s ease;
+}
+
+:root[data-theme="dark"] .tooltip { background: var(--surface-2); color: var(--ink); border: 0.8px solid var(--border-strong); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .tooltip { background: var(--surface-2); color: var(--ink); border: 0.8px solid var(--border-strong); }
+}
+
+.tooltip.show { opacity: 1; }
+
+.tooltip .tt-value { font-weight: 600; }
+.tooltip .tt-label { color: var(--ink-muted); }
+
+/* --------------------------------------------------------- misc util */
+
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.empty-state {
+  padding: 30px 14px;
+  text-align: center;
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+/* ------------------------------------------------------- video row extras */
+
+.cell-title-ko {
+  display: block;
+  font-size: 13px;
+  color: var(--ink-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 2px;
+}
+
+.cell-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.tag-chip {
+  display: inline-block;
+  font-size: 13px;
+  padding: 1px 8px;
+  border-radius: var(--radius-pill);
+  border: 0.8px solid var(--border-strong);
+  color: var(--ink-muted);
+  background: transparent;
+  cursor: pointer;
+  line-height: 1.6;
+}
+
+.tag-chip:hover { border-color: var(--border-btn); color: var(--ink); }
+
+.tag-chip.tag-chip-more {
+  cursor: default;
+  border-style: dashed;
+}
+
+/* 성향 배지 — 태그 칩(필 모양)과 모양으로 구분: 각진 사각 배지 */
+.theme-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.theme-badge {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: var(--radius-xs);
+  border: 0.8px solid var(--border-strong);
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+.theme-badge.theme-badge-unclassified {
+  color: var(--ink-muted);
+  border-style: dashed;
+  background: transparent;
+}
+
+.badge-pr {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: var(--radius-xs);
+  border: 0.8px solid var(--border-btn);
+  background: transparent;
+  color: var(--ink);
+}
+
+/* ---------------------------------------------------------- 태그/성향 필터 */
+
+.active-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--surface-2);
+  border: 0.8px solid var(--border);
+  border-radius: var(--radius-lg);
+  font-size: 13px;
+}
+
+.active-filter-bar .chip-toggle {
+  pointer-events: none;
+}
+
+.clear-filter-btn {
+  border: 0.8px solid var(--border-btn);
+  background: transparent;
+  color: var(--ink);
+  border-radius: var(--radius-pill);
+  padding: 4px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.clear-filter-btn:hover { border-color: var(--ink); }
+
+.tag-search-input {
+  border: 0.8px solid var(--border-btn);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: var(--radius-pill);
+  padding: 6px 14px;
+  font-size: 14px;
+  min-width: 160px;
+}
+
+.tag-search-results {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+  width: 100%;
+}
+
+/* --------------------------------------------------- 채널 표 성향/태그 셀 */
+
+.channel-toptags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-width: 220px;
+}
+
+.theme-top-label {
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+/* ---------------------------------------------------- reduced motion */
+/* 정렬 변경 시 행 이동(FLIP), 막대/산점도 값 전환은 정보 전달용 모션이다.
+   줄여서 움직임을 원치 않는 사용자에게는 전부 끄고 최종 상태만 즉시 보여준다.
+   기능(정렬·필터·페이지 이동)은 동일하게 동작한다. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
