@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>구조 해부 — 내 예산으로 서울 어디?</title>
+<style>
+  :root {
+    --ink:      #111821;
+    --paper:    #F7F8F9;
+    --surface:  #FFFFFF;
+    --line:     #DFE3E7;
+    --muted:    #667079;
+    --faint:    #9AA3AB;
+    --accent:   #0066FF;
+    --accent-soft: #EAF2FE;
+    --bronze:   #8A6A3B;
+    --bronze-soft: #F5EFE4;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink:      #E6EAEE;
+      --paper:    #0E1318;
+      --surface:  #161C23;
+      --line:     #2A333D;
+      --muted:    #98A3AD;
+      --faint:    #6C7781;
+      --accent:   #4F95FF;
+      --accent-soft: #14243C;
+      --bronze:   #C9A063;
+      --bronze-soft: #2A2318;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ink:      #E6EAEE;
+    --paper:    #0E1318;
+    --surface:  #161C23;
+    --line:     #2A333D;
+    --muted:    #98A3AD;
+    --faint:    #6C7781;
+    --accent:   #4F95FF;
+    --accent-soft: #14243C;
+    --bronze:   #C9A063;
+    --bronze-soft: #2A2318;
+  }
+
+  :root[data-theme="light"] {
+    --ink:      #111821;
+    --paper:    #F7F8F9;
+    --surface:  #FFFFFF;
+    --line:     #DFE3E7;
+    --muted:    #667079;
+    --faint:    #9AA3AB;
+    --accent:   #0066FF;
+    --accent-soft: #EAF2FE;
+    --bronze:   #8A6A3B;
+    --bronze-soft: #F5EFE4;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont,
+                 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.75;
+    word-break: keep-all;
+  }
+
+  .mono {
+    font-family: ui-monospace, 'Cascadia Mono', 'Cascadia Code',
+                 Consolas, 'D2Coding', 'Courier New', monospace;
+    font-variant-ligatures: none;
+  }
+
+  .wrap {
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 72px 24px 120px;
+  }
+
+  /* ---------- header ---------- */
+
+  .eyebrow {
+    font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--faint);
+    margin: 0 0 14px;
+  }
+
+  h1 {
+    font-size: clamp(30px, 5.2vw, 42px);
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+    font-weight: 800;
+    margin: 0 0 18px;
+    text-wrap: balance;
+  }
+
+  .lede {
+    font-size: 17px;
+    color: var(--muted);
+    max-width: 62ch;
+    margin: 0;
+  }
+
+  .masthead {
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 56px;
+  }
+
+  /* ---------- sections ---------- */
+
+  section { margin-bottom: 72px; }
+
+  h2 {
+    font-size: 23px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0 0 6px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  h2 .tag {
+    font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    font-weight: 500;
+    color: var(--faint);
+    text-transform: uppercase;
+  }
+
+  .sub {
+    color: var(--muted);
+    margin: 0 0 28px;
+    max-width: 64ch;
+  }
+
+  p { margin: 0 0 16px; max-width: 66ch; }
+
+  /* ---------- figure ---------- */
+
+  figure {
+    margin: 0 0 28px;
+    padding: 28px 24px 20px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow-x: auto;
+  }
+
+  figure svg {
+    display: block;
+    width: 100%;
+    min-width: 620px;
+    max-width: 100%;
+    height: auto;
+    color: var(--ink);
+  }
+
+  figcaption {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    font-size: 13.5px;
+    color: var(--muted);
+    min-width: 620px;
+  }
+
+  /* ---------- phase legend ---------- */
+
+  .phases {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .phase {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    padding: 6px 13px 6px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+  }
+
+  .phase::before {
+    content: "";
+    width: 9px; height: 9px;
+    border-radius: 2px;
+    background: currentColor;
+  }
+
+  .phase.build   { color: var(--bronze); }
+  .phase.runtime { color: var(--accent); }
+  .phase b { color: var(--ink); font-weight: 600; }
+
+  /* ---------- tables ---------- */
+
+  .tbl-scroll { overflow-x: auto; margin-bottom: 20px; }
+
+  table {
+    width: 100%;
+    min-width: 540px;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  caption {
+    text-align: left;
+    font-size: 13px;
+    color: var(--faint);
+    padding-bottom: 10px;
+    font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+
+  thead th {
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--faint);
+    font-weight: 600;
+    border-bottom-width: 1.5px;
+  }
+
+  td.idx {
+    font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    width: 44px;
+  }
+
+  td.field {
+    font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+    white-space: nowrap;
+  }
+
+  td.num {
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  tbody tr:last-child th,
+  tbody tr:last-child td { border-bottom: none; }
+
+  /* ---------- code / tree ---------- */
+
+  pre {
+    margin: 0 0 20px;
+    padding: 20px 22px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow-x: auto;
+    font-family: ui-monospace, 'Cascadia Mono', Consolas, 'D2Coding', monospace;
+    font-size: 13px;
+    line-height: 1.85;
+    color: var(--ink);
+  }
+
+  pre .c { color: var(--faint); }
+  pre .b { color: var(--bronze); }
+  pre .a { color: var(--accent); }
+
+  code.inline {
+    font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+    font-size: 0.9em;
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 2px 6px;
+    border-radius: 5px;
+  }
+
+  /* ---------- callout ---------- */
+
+  .note {
+    border-left: 3px solid var(--bronze);
+    background: var(--bronze-soft);
+    padding: 18px 22px;
+    border-radius: 0 12px 12px 0;
+    margin-bottom: 24px;
+  }
+
+  .note p { margin: 0; max-width: none; }
+  .note strong { color: var(--bronze); }
+
+  /* ---------- stats ---------- */
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(158px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .stat { background: var(--surface); padding: 20px 18px; }
+
+  .stat dt {
+    font-size: 12px;
+    color: var(--faint);
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+  }
+
+  .stat dd {
+    margin: 0;
+    font-size: 25px;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat dd .u {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    margin-left: 3px;
+    letter-spacing: 0;
+  }
+
+  /* ---------- footer ---------- */
+
+  footer {
+    margin-top: 88px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    font-size: 13px;
+    color: var(--faint);
+  }
+
+  footer a { color: var(--accent); }
+
+  a:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+
+  @media (max-width: 640px) {
+    .wrap { padding: 48px 16px 80px; }
+    figure { padding: 18px 14px 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">구조 해부 · Architecture</p>
+    <h1>27MB짜리 엑셀 파일을<br>서버 없이 지도로 만드는 법</h1>
+    <p class="lede">
+      「내 예산으로 서울 어디?」는 서버가 없습니다. GitHub Pages는 파일만 내려줄 뿐
+      계산을 대신해 주지 않습니다. 그런데도 32만 건을 훑는 필터가 25밀리초 만에 반응합니다.
+      그 요령을 세 장의 그림으로 풀었습니다.
+    </p>
+  </header>
+
+  <section>
+    <h2>전체 그림 <span class="tag">Pipeline</span></h2>
+    <p class="sub">
+      핵심은 일을 두 번에 나눠 하는 것입니다. 무거운 계산은 <b>내 노트북에서 미리</b> 끝내고,
+      브라우저에는 잘게 쪼갠 결과만 보냅니다.
+    </p>
+
+    <div class="phases">
+      <span class="phase build"><b>빌드 타임</b> — 내 컴퓨터, 파이썬, 딱 한 번</span>
+      <span class="phase runtime"><b>런타임</b> — 사용자 브라우저, 자바스크립트, 매번</span>
+    </div>
+
+    <figure>
+      <svg viewBox="0 0 940 396" role="img"
+           aria-label="27MB CSV와 GeoJSON이 두 개의 파이썬 스크립트를 거쳐 data 폴더의 JSON 파일로 변환되고, 브라우저는 첫 로드에 요약과 지도만 받은 뒤 구를 클릭할 때 해당 구 파일을 하나씩 받는다">
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5"
+                  markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+          </marker>
+          <marker id="ah-b" viewBox="0 0 10 10" refX="9" refY="5"
+                  markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--bronze)"/>
+          </marker>
+          <marker id="ah-a" viewBox="0 0 10 10" refX="9" refY="5"
+                  markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"/>
+          </marker>
+        </defs>
+
+        <!-- phase headers -->
+        <text x="24" y="24" font-size="12" font-weight="700" fill="var(--bronze)"
+              letter-spacing="1.4">빌드 타임 · 한 번만</text>
+        <text x="722" y="24" font-size="12" font-weight="700" fill="var(--accent)"
+              letter-spacing="1.4">런타임 · 매번</text>
+
+        <!-- divider -->
+        <line x1="700" y1="38" x2="700" y2="376" stroke="currentColor"
+              stroke-width="1" stroke-dasharray="3 5" opacity="0.35"/>
+
+        <!-- inputs -->
+        <rect x="24" y="96" width="164" height="70" rx="9"
+              fill="none" stroke="var(--bronze)" stroke-width="1.5"/>
+        <text x="106" y="123" font-size="12.5" font-weight="600" text-anchor="middle"
+              fill="currentColor" font-family="monospace">seoul-apt-latest.csv</text>
+        <text x="106" y="143" font-size="11.5" text-anchor="middle" fill="currentColor"
+              opacity="0.6">27MB · 320,141행</text>
+
+        <rect x="24" y="230" width="164" height="70" rx="9"
+              fill="none" stroke="var(--bronze)" stroke-width="1.5"/>
+        <text x="106" y="257" font-size="12.5" font-weight="600" text-anchor="middle"
+              fill="currentColor" font-family="monospace">seoul.json</text>
+        <text x="106" y="277" font-size="11.5" text-anchor="middle" fill="currentColor"
+              opacity="0.6">행정구역 25개 폴리곤</text>
+
+        <!-- scripts -->
+        <rect x="248" y="104" width="158" height="54" rx="9"
+              fill="var(--bronze)" fill-opacity="0.1" stroke="var(--bronze)" stroke-width="1.5"/>
+        <text x="327" y="136" font-size="12.5" font-weight="700" text-anchor="middle"
+              fill="currentColor" font-family="monospace">build_data.py</text>
+
+        <rect x="248" y="238" width="158" height="54" rx="9"
+              fill="var(--bronze)" fill-opacity="0.1" stroke="var(--bronze)" stroke-width="1.5"/>
+        <text x="327" y="270" font-size="12.5" font-weight="700" text-anchor="middle"
+              fill="currentColor" font-family="monospace">build_map.py</text>
+
+        <!-- input -> script arrows -->
+        <line x1="188" y1="131" x2="240" y2="131" stroke="var(--bronze)" stroke-width="1.5"
+              marker-end="url(#ah-b)"/>
+        <text x="214" y="122" font-size="10.5" text-anchor="middle" fill="currentColor"
+              opacity="0.65">쪼갬</text>
+
+        <line x1="188" y1="265" x2="240" y2="265" stroke="var(--bronze)" stroke-width="1.5"
+              marker-end="url(#ah-b)"/>
+        <text x="214" y="256" font-size="10.5" text-anchor="middle" fill="currentColor"
+              opacity="0.65">투영</text>
+
+        <!-- data/ container -->
+        <rect x="462" y="74" width="196" height="256" rx="11"
+              fill="none" stroke="currentColor" stroke-width="1" opacity="0.4"/>
+        <text x="474" y="66" font-size="11.5" font-weight="700" fill="currentColor"
+              font-family="monospace" opacity="0.75">data/</text>
+
+        <rect x="478" y="94" width="164" height="48" rx="8"
+              fill="currentColor" fill-opacity="0.05" stroke="currentColor"
+              stroke-width="1" stroke-opacity="0.5"/>
+        <text x="560" y="114" font-size="11.5" font-weight="600" text-anchor="middle"
+              fill="currentColor" font-family="monospace">summary.json</text>
+        <text x="560" y="131" font-size="10.5" text-anchor="middle" fill="currentColor"
+              opacity="0.6">25구 집계 · 957B</text>
+
+        <rect x="478" y="154" width="164" height="48" rx="8"
+              fill="currentColor" fill-opacity="0.05" stroke="currentColor"
+              stroke-width="1" stroke-opacity="0.5"/>
+        <text x="560" y="174" font-size="11.5" font-weight="600" text-anchor="middle"
+              fill="currentColor" font-family="monospace">seoul-map.json</text>
+        <text x="560" y="191" font-size="10.5" text-anchor="middle" fill="currentColor"
+              opacity="0.6">SVG 경로 · 6.4KB</text>
+
+        <rect x="478" y="214" width="164" height="98" rx="8"
+              fill="currentColor" fill-opacity="0.05" stroke="currentColor"
+              stroke-width="1" stroke-opacity="0.5"/>
+        <text x="560" y="240" font-size="11.5" font-weight="600" text-anchor="middle"
+              fill="currentColor" font-family="monospace">gu/11010.json</text>
+        <text x="560" y="259" font-size="11.5" font-weight="600" text-anchor="middle"
+              fill="currentColor" font-family="monospace" opacity="0.45">⋮</text>
+        <text x="560" y="279" font-size="11.5" font-weight="600" text-anchor="middle"
+              fill="currentColor" font-family="monospace">gu/11250.json</text>
+        <text x="560" y="298" font-size="10.5" text-anchor="middle" fill="currentColor"
+              opacity="0.6">구별 25개 · 각 50~214KB</text>
+
+        <!-- script -> data arrows -->
+        <path d="M406,131 L436,131 L436,118 L470,118" fill="none"
+              stroke="var(--bronze)" stroke-width="1.5" marker-end="url(#ah-b)"/>
+        <path d="M406,131 L436,131 L436,258 L470,258" fill="none"
+              stroke="var(--bronze)" stroke-width="1.5" marker-end="url(#ah-b)"/>
+        <path d="M406,265 L426,265 L426,178 L470,178" fill="none"
+              stroke="var(--bronze)" stroke-width="1.5" marker-end="url(#ah-b)"/>
+
+        <!-- browser -->
+        <rect x="736" y="94" width="180" height="218" rx="11"
+              fill="none" stroke="var(--accent)" stroke-width="1.5"/>
+        <text x="826" y="86" font-size="11.5" font-weight="700" text-anchor="middle"
+              fill="var(--accent)">브라우저</text>
+
+        <rect x="754" y="116" width="144" height="72" rx="8"
+              fill="var(--accent)" fill-opacity="0.08"/>
+        <text x="826" y="140" font-size="11.5" font-weight="700" text-anchor="middle"
+              fill="currentColor">첫 화면</text>
+        <text x="826" y="159" font-size="10.5" text-anchor="middle" fill="currentColor"
+              opacity="0.7">지도 + 25구 집계</text>
+        <text x="826" y="176" font-size="10.5" text-anchor="middle" fill="var(--accent)"
+              font-weight="700">7KB만 받음</text>
+
+        <rect x="754" y="212" width="144" height="80" rx="8"
+              fill="var(--accent)" fill-opacity="0.08"/>
+        <text x="826" y="236" font-size="11.5" font-weight="700" text-anchor="middle"
+              fill="currentColor">구를 클릭하면</text>
+        <text x="826" y="255" font-size="10.5" text-anchor="middle" fill="currentColor"
+              opacity="0.7">그 구 파일 1개만</text>
+        <text x="826" y="272" font-size="10.5" text-anchor="middle" fill="currentColor"
+              opacity="0.7">추가로 내려받음</text>
+
+        <!-- data -> browser arrows -->
+        <path d="M658,140 L700,140 L700,150 L744,150" fill="none"
+              stroke="var(--accent)" stroke-width="1.5" marker-end="url(#ah-a)"/>
+        <path d="M658,262 L700,262 L700,252 L744,252" fill="none"
+              stroke="var(--accent)" stroke-width="1.5" marker-end="url(#ah-a)"/>
+        <text x="700" y="128" font-size="10.5" text-anchor="middle" fill="var(--accent)"
+              font-weight="600">즉시</text>
+        <text x="700" y="286" font-size="10.5" text-anchor="middle" fill="var(--accent)"
+              font-weight="600">필요할 때</text>
+
+        <!-- bottom note -->
+        <text x="24" y="368" font-size="11" fill="currentColor" opacity="0.55">
+          원본 CSV는 저장소에만 있고 브라우저로는 단 한 바이트도 가지 않습니다.
+        </text>
+      </svg>
+      <figcaption>
+        <b>그림 1.</b> 27MB CSV는 브라우저에 도달하지 않습니다. 빌드 타임에 구 단위로 쪼개 두고,
+        런타임에는 필요한 구 파일만 골라 받습니다.
+      </figcaption>
+    </figure>
+
+    <div class="note">
+      <p>
+        <strong>왜 굳이 쪼갰나</strong> — 32만 행을 한 파일로 보내면 첫 화면이 뜨기까지
+        수십 초가 걸립니다. 반면 서울 지도를 칠하는 데 필요한 건 “구별 몇 건”이라는
+        숫자 25개뿐입니다. 그래서 집계만 먼저 보내고(957바이트), 상세 거래는
+        사용자가 그 구를 실제로 눌렀을 때 받습니다.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2>거래 한 건은 어떻게 저장되나 <span class="tag">Row encoding</span></h2>
+    <p class="sub">
+      구 파일이 작은 두 번째 이유입니다. 거래 한 건을 <b>객체가 아니라 배열</b>로 저장하고,
+      반복되는 이름은 따로 빼서 번호로 가리킵니다.
+    </p>
+
+    <figure>
+      <svg viewBox="0 0 940 340" role="img"
+           aria-label="법정동과 단지 이름은 배열에 한 번만 저장하고, 각 거래 행은 그 배열의 인덱스 번호로 이름을 가리키는 8칸짜리 배열이다">
+        <defs>
+          <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5"
+                  markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"/>
+          </marker>
+        </defs>
+
+        <!-- lookup arrays, side by side so nothing has to be routed through them -->
+        <text x="24" y="26" font-size="11.5" font-weight="700" fill="currentColor"
+              opacity="0.6" letter-spacing="0.8">이름은 파일에 딱 한 번만 저장</text>
+
+        <rect x="24" y="40" width="306" height="64" rx="8"
+              fill="currentColor" fill-opacity="0.04"
+              stroke="currentColor" stroke-width="1" stroke-opacity="0.4"/>
+        <text x="40" y="64" font-size="11.5" font-weight="700" fill="currentColor"
+              font-family="monospace">dongs</text>
+        <text x="40" y="86" font-size="11" fill="currentColor" font-family="monospace"
+              opacity="0.8">["공릉동", "월계동", "하계동", "중계동", …]</text>
+
+        <rect x="346" y="40" width="306" height="64" rx="8"
+              fill="currentColor" fill-opacity="0.04"
+              stroke="currentColor" stroke-width="1" stroke-opacity="0.4"/>
+        <text x="362" y="64" font-size="11.5" font-weight="700" fill="currentColor"
+              font-family="monospace">complexes</text>
+        <text x="362" y="86" font-size="11" fill="currentColor" font-family="monospace"
+              opacity="0.8">[…, "동진신안", …]</text>
+
+        <!-- each row cell points back into the array it borrows a name from -->
+        <path d="M74,104 L74,180 L134,180 L134,196" fill="none" stroke="var(--accent)"
+              stroke-width="1.5" marker-end="url(#ah2)"/>
+        <path d="M396,104 L396,180 L214,180 L214,196" fill="none" stroke="var(--accent)"
+              stroke-width="1.5" marker-end="url(#ah2)"/>
+        <text x="90" y="172" font-size="10" fill="var(--accent)" opacity="0.9"
+              font-family="monospace">3번째</text>
+        <text x="252" y="172" font-size="10" fill="var(--accent)" opacity="0.9"
+              font-family="monospace">100번째</text>
+
+        <!-- the row -->
+        <g font-family="monospace">
+          <rect x="96" y="200" width="76" height="46" rx="6" fill="var(--accent)"
+                fill-opacity="0.12" stroke="var(--accent)" stroke-width="1.4"/>
+          <text x="134" y="229" font-size="14" font-weight="700" text-anchor="middle"
+                fill="currentColor">3</text>
+
+          <rect x="176" y="200" width="76" height="46" rx="6" fill="var(--accent)"
+                fill-opacity="0.12" stroke="var(--accent)" stroke-width="1.4"/>
+          <text x="214" y="229" font-size="14" font-weight="700" text-anchor="middle"
+                fill="currentColor">100</text>
+
+          <rect x="256" y="200" width="76" height="46" rx="6"
+                fill="currentColor" fill-opacity="0.05"
+                stroke="currentColor" stroke-width="1" stroke-opacity="0.45"/>
+          <text x="294" y="229" font-size="14" text-anchor="middle" fill="currentColor">135.0</text>
+
+          <rect x="336" y="200" width="60" height="46" rx="6"
+                fill="currentColor" fill-opacity="0.05"
+                stroke="currentColor" stroke-width="1" stroke-opacity="0.45"/>
+          <text x="366" y="229" font-size="14" text-anchor="middle" fill="currentColor">11</text>
+
+          <rect x="400" y="200" width="60" height="46" rx="6"
+                fill="currentColor" fill-opacity="0.05"
+                stroke="currentColor" stroke-width="1" stroke-opacity="0.45"/>
+          <text x="430" y="229" font-size="14" text-anchor="middle" fill="currentColor">0</text>
+
+          <rect x="464" y="200" width="104" height="46" rx="6"
+                fill="currentColor" fill-opacity="0.05"
+                stroke="currentColor" stroke-width="1" stroke-opacity="0.45"/>
+          <text x="516" y="229" font-size="14" text-anchor="middle" fill="currentColor">156000</text>
+
+          <rect x="572" y="200" width="60" height="46" rx="6"
+                fill="currentColor" fill-opacity="0.05"
+                stroke="currentColor" stroke-width="1" stroke-opacity="0.45"/>
+          <text x="602" y="229" font-size="14" text-anchor="middle" fill="currentColor">0</text>
+
+          <rect x="636" y="200" width="98" height="46" rx="6"
+                fill="currentColor" fill-opacity="0.05"
+                stroke="currentColor" stroke-width="1" stroke-opacity="0.45"/>
+          <text x="685" y="229" font-size="14" text-anchor="middle" fill="currentColor">"260520"</text>
+        </g>
+
+        <!-- index + field name, merged so the space above the row stays free -->
+        <g font-size="10.5" text-anchor="middle">
+          <text x="134" y="266" fill="currentColor" opacity="0.72"><tspan fill="var(--accent)" font-family="monospace" font-weight="700">0</tspan> 법정동</text>
+          <text x="214" y="266" fill="currentColor" opacity="0.72"><tspan fill="var(--accent)" font-family="monospace" font-weight="700">1</tspan> 단지</text>
+          <text x="294" y="266" fill="currentColor" opacity="0.72"><tspan fill="var(--accent)" font-family="monospace" font-weight="700">2</tspan> 면적㎡</text>
+          <text x="366" y="266" fill="currentColor" opacity="0.72"><tspan fill="var(--accent)" font-family="monospace" font-weight="700">3</tspan> 층</text>
+          <text x="430" y="266" fill="currentColor" opacity="0.72"><tspan fill="var(--accent)" font-family="monospace" font-weight="700">4</tspan> 유형</text>
+          <text x="516" y="266" fill="currentColor" opacity="0.72"><tspan fill="var(--accent)" font-family="monospace" font-weight="700">5</tspan> 금액</text>
+          <text x="602" y="266" fill="currentColor" opacity="0.72"><tspan fill="var(--accent)" font-family="monospace" font-weight="700">6</tspan> 월세</text>
+          <text x="685" y="266" fill="currentColor" opacity="0.72"><tspan fill="var(--accent)" font-family="monospace" font-weight="700">7</tspan> 날짜</text>
+        </g>
+
+        <!-- reading -->
+        <line x1="96" y1="292" x2="734" y2="292" stroke="currentColor"
+              stroke-width="1" opacity="0.2"/>
+        <text x="96" y="316" font-size="12" fill="currentColor">
+          <tspan font-weight="700">8칸을 읽으면</tspan>
+          <tspan dx="8" opacity="0.85">중계동 동진신안 · 135.0㎡ · 11층 · 매매 15억 6,000만원 · 2026-05-20</tspan>
+        </text>
+
+        <!-- savings callout -->
+        <rect x="762" y="40" width="154" height="118" rx="9"
+              fill="var(--accent)" fill-opacity="0.08" stroke="var(--accent)" stroke-width="1.2"/>
+        <text x="839" y="66" font-size="11" text-anchor="middle" fill="currentColor"
+              opacity="0.7">노원구 파일</text>
+        <text x="839" y="92" font-size="17" font-weight="700" text-anchor="middle"
+              fill="currentColor" font-family="monospace">859KB</text>
+        <text x="839" y="112" font-size="12" text-anchor="middle" fill="currentColor"
+              opacity="0.5">↓ gzip</text>
+        <text x="839" y="136" font-size="17" font-weight="700" text-anchor="middle"
+              fill="var(--accent)" font-family="monospace">193KB</text>
+      </svg>
+      <figcaption>
+        <b>그림 2.</b> “중계동”이라는 글자를 5,909번 반복하는 대신 숫자 <span class="mono">3</span> 을
+        5,909번 씁니다. 키 이름(<span class="mono">"dong":</span> 같은 것)도 통째로 사라집니다.
+      </figcaption>
+    </figure>
+
+    <div class="tbl-scroll">
+      <table>
+        <caption>rows[] 8칸의 의미 — 순서가 곧 스키마입니다</caption>
+        <thead>
+          <tr><th>칸</th><th>이름</th><th>타입</th><th>설명</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="idx">0</td><td class="field">dongIdx</td><td>int</td><td><span class="mono">dongs</span> 배열의 몇 번째인지</td></tr>
+          <tr><td class="idx">1</td><td class="field">complexIdx</td><td>int</td><td><span class="mono">complexes</span> 배열의 몇 번째인지</td></tr>
+          <tr><td class="idx">2</td><td class="field">areaM2</td><td>float</td><td>전용면적 ㎡ (소수 1자리)</td></tr>
+          <tr><td class="idx">3</td><td class="field">floor</td><td>int</td><td>층. 지하는 음수, 알 수 없으면 0</td></tr>
+          <tr><td class="idx">4</td><td class="field">dealType</td><td>int</td><td>0 매매 · 1 전세 · 2 월세</td></tr>
+          <tr><td class="idx">5</td><td class="field">amount</td><td>int</td><td>만원. 매매는 거래가, 전세·월세는 보증금</td></tr>
+          <tr><td class="idx">6</td><td class="field">monthlyRent</td><td>int</td><td>만원. 월세만 값이 있고 나머지는 0</td></tr>
+          <tr><td class="idx">7</td><td class="field">date</td><td>string</td><td>YYMMDD 6자리</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <p>
+        <strong>월세만 특별 취급합니다</strong> — 월세는 금액이 보증금과 월세 두 개라
+        “3억 이하”로 한 줄에 세울 수가 없습니다. 그래서 비교할 때만
+        <span class="mono">보증금 + 월세 × 100</span> 으로 환산해 한 축에 올리고,
+        화면에는 <span class="mono">1억 + 45만</span> 처럼 원래 값을 그대로 보여줍니다.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2>슬라이더를 움직이면 벌어지는 일 <span class="tag">Runtime loop</span></h2>
+    <p class="sub">
+      서버에 묻지 않습니다. 이미 받아 둔 배열을 브라우저가 한 번 훑고 화면 세 곳을 다시 그립니다.
+    </p>
+
+    <figure>
+      <svg viewBox="0 0 940 316" role="img"
+           aria-label="필터를 조작하면 상태 객체가 바뀌고, 거래 배열을 한 번 훑어 지도와 요약과 목록 세 곳을 다시 그리며, 동시에 주소창도 갱신된다">
+        <defs>
+          <marker id="ah3" viewBox="0 0 10 10" refX="9" refY="5"
+                  markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+          </marker>
+          <marker id="ah3a" viewBox="0 0 10 10" refX="9" refY="5"
+                  markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"/>
+          </marker>
+        </defs>
+
+        <!-- filters -->
+        <rect x="20" y="76" width="150" height="150" rx="10"
+              fill="none" stroke="currentColor" stroke-width="1.3" stroke-opacity="0.55"/>
+        <text x="95" y="66" font-size="11.5" font-weight="700" text-anchor="middle"
+              fill="currentColor">사용자 조작</text>
+        <g font-size="11" fill="currentColor" opacity="0.8">
+          <text x="36" y="102">거래유형</text>
+          <text x="36" y="126">예산 슬라이더</text>
+          <text x="36" y="150">면적 · 층</text>
+          <text x="36" y="174">자치구 선택</text>
+          <text x="36" y="198">기간 · 정렬</text>
+        </g>
+
+        <!-- state -->
+        <rect x="222" y="106" width="150" height="90" rx="10"
+              fill="currentColor" fill-opacity="0.05"
+              stroke="currentColor" stroke-width="1.3" stroke-opacity="0.55"/>
+        <text x="297" y="134" font-size="12" font-weight="700" text-anchor="middle"
+              fill="currentColor" font-family="monospace">state</text>
+        <text x="297" y="155" font-size="10.5" text-anchor="middle" fill="currentColor"
+              opacity="0.65">필터 10개 값을</text>
+        <text x="297" y="172" font-size="10.5" text-anchor="middle" fill="currentColor"
+              opacity="0.65">담은 객체 하나</text>
+
+        <!-- recompute -->
+        <rect x="424" y="96" width="164" height="110" rx="10"
+              fill="var(--accent)" fill-opacity="0.1" stroke="var(--accent)" stroke-width="1.8"/>
+        <text x="506" y="126" font-size="12.5" font-weight="700" text-anchor="middle"
+              fill="currentColor" font-family="monospace">recompute</text>
+        <text x="506" y="149" font-size="10.5" text-anchor="middle" fill="currentColor"
+              opacity="0.7">해당 유형 배열을</text>
+        <text x="506" y="166" font-size="10.5" text-anchor="middle" fill="currentColor"
+              opacity="0.7">한 번만 훑음</text>
+        <text x="506" y="190" font-size="13" font-weight="700" text-anchor="middle"
+              fill="var(--accent)" font-family="monospace">12~25ms</text>
+
+        <!-- outputs -->
+        <g>
+          <rect x="656" y="52" width="164" height="52" rx="9"
+                fill="none" stroke="currentColor" stroke-width="1.2" stroke-opacity="0.5"/>
+          <text x="738" y="74" font-size="12" font-weight="700" text-anchor="middle"
+                fill="currentColor">지도 25구</text>
+          <text x="738" y="92" font-size="10.5" text-anchor="middle" fill="currentColor"
+                opacity="0.65">색 다시 칠하기</text>
+
+          <rect x="656" y="122" width="164" height="52" rx="9"
+                fill="none" stroke="currentColor" stroke-width="1.2" stroke-opacity="0.5"/>
+          <text x="738" y="144" font-size="12" font-weight="700" text-anchor="middle"
+                fill="currentColor">요약 카드</text>
+          <text x="738" y="162" font-size="10.5" text-anchor="middle" fill="currentColor"
+                opacity="0.65">건수 · 최저 · 중앙값</text>
+
+          <rect x="656" y="192" width="164" height="52" rx="9"
+                fill="none" stroke="currentColor" stroke-width="1.2" stroke-opacity="0.5"/>
+          <text x="738" y="214" font-size="12" font-weight="700" text-anchor="middle"
+                fill="currentColor">거래 목록</text>
+          <text x="738" y="232" font-size="10.5" text-anchor="middle" fill="currentColor"
+                opacity="0.65">50건씩 페이지</text>
+        </g>
+
+        <!-- arrows -->
+        <line x1="170" y1="151" x2="214" y2="151" stroke="currentColor"
+              stroke-width="1.4" marker-end="url(#ah3)"/>
+        <line x1="372" y1="151" x2="416" y2="151" stroke="var(--accent)"
+              stroke-width="1.6" marker-end="url(#ah3a)"/>
+
+        <path d="M588,151 L620,151 L620,78 L648,78" fill="none" stroke="var(--accent)"
+              stroke-width="1.6" marker-end="url(#ah3a)"/>
+        <path d="M588,151 L648,151" fill="none" stroke="var(--accent)"
+              stroke-width="1.6" marker-end="url(#ah3a)"/>
+        <path d="M588,151 L620,151 L620,218 L648,218" fill="none" stroke="var(--accent)"
+              stroke-width="1.6" marker-end="url(#ah3a)"/>
+
+        <!-- URL sync -->
+        <rect x="222" y="240" width="366" height="46" rx="9"
+              fill="currentColor" fill-opacity="0.04"
+              stroke="currentColor" stroke-width="1" stroke-dasharray="4 4" stroke-opacity="0.5"/>
+        <text x="405" y="268" font-size="11" text-anchor="middle" fill="currentColor"
+              font-family="monospace" opacity="0.8">?t=1&#38;b=30000&#38;amin=20&#38;gu=11110&#38;s=priceAsc</text>
+
+        <path d="M297,196 L297,234" fill="none" stroke="currentColor"
+              stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#ah3)"/>
+        <path d="M340,234 L340,196" fill="none" stroke="currentColor"
+              stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#ah3)"/>
+        <text x="180" y="258" font-size="10.5" fill="currentColor" opacity="0.6">주소창</text>
+        <text x="612" y="258" font-size="10.5" fill="currentColor" opacity="0.6">
+          링크만 주면 같은 화면
+        </text>
+
+        <!-- top label -->
+        <text x="20" y="28" font-size="11" fill="currentColor" opacity="0.55">
+          서버 왕복 없음 — 모든 계산이 브라우저 안에서 끝납니다.
+        </text>
+      </svg>
+      <figcaption>
+        <b>그림 3.</b> 상태가 바뀔 때마다 주소창도 함께 갱신됩니다. 그래서 지금 보고 있는 화면을
+        링크로 그대로 넘길 수 있습니다.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>파일 구조 <span class="tag">Files</span></h2>
+    <p class="sub">
+      빌드 도구도, 프레임워크도, <span class="mono">npm install</span> 도 없습니다.
+      저장소에 올린 파일이 그대로 웹사이트가 됩니다.
+    </p>
+
+<pre><span class="c">저장소 루트 = 웹사이트 루트 (GitHub Pages)</span>
+
+index.html               <span class="c">대시보드 본체 (한 페이지)</span>
+assets/
+  ├ app.js               <span class="c">필터 · 상태 · 렌더링 전부</span>  <span class="a">30KB → 7.9KB</span>
+  └ style.css            <span class="c">Montage 토큰 기반 스타일</span>   <span class="a">9.6KB → 2.2KB</span>
+data/                    <span class="c">← 빌드 결과물. 손으로 고치지 않음</span>
+  ├ summary.json         <span class="c">25구 집계</span>              <span class="a">→ 957B</span>
+  ├ seoul-map.json       <span class="c">25구 SVG 경로</span>           <span class="a">→ 6.4KB</span>
+  └ gu/11010.json …      <span class="c">구별 거래 25개 파일</span>      <span class="a">→ 각 50~214KB</span>
+
+<span class="b">build_data.py</span>            <span class="c">CSV → summary.json + gu/*.json</span>
+<span class="b">build_map.py</span>             <span class="c">GeoJSON → seoul-map.json</span>
+seoul-apt-latest.csv     <span class="c">원본 27MB. 배포는 되지만 페이지가 부르지 않음</span>
+PRD.md                   <span class="c">기획서 · 데이터 계약</span>
+</pre>
+
+    <p>
+      <span class="mono">data/</span> 안의 파일은 사람이 편집하는 곳이 아닙니다.
+      원본 CSV가 바뀌면 <span class="mono">build_data.py</span> 를 다시 돌려서 통째로 새로 만듭니다.
+    </p>
+  </section>
+
+  <section>
+    <h2>숫자로 <span class="tag">By the numbers</span></h2>
+    <dl class="stats">
+      <div class="stat"><dt>전체 거래</dt><dd>320,141<span class="u">건</span></dd></div>
+      <div class="stat"><dt>기간</dt><dd>12<span class="u">개월</span></dd></div>
+      <div class="stat"><dt>자치구</dt><dd>25<span class="u">개</span></dd></div>
+      <div class="stat"><dt>첫 화면 전송량</dt><dd>7<span class="u">KB</span></dd></div>
+      <div class="stat"><dt>가장 큰 구 파일</dt><dd>214<span class="u">KB (gzip)</span></dd></div>
+      <div class="stat"><dt>필터 반응</dt><dd>25<span class="u">ms 이내</span></dd></div>
+    </dl>
+  </section>
+
+  <footer>
+    「내 예산으로 서울 어디?」 구조 문서 ·
+    데이터 출처 서울열린데이터광장 서울시 부동산 실거래가 정보(OA-21275), 2025.07~2026.06 ·
+    <a href="../index.html">대시보드로 돌아가기</a>
+  </footer>
+
+</div>
+</body>
+</html>
