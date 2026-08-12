@@ -3,238 +3,131 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>임정 소개</title>
+<title>내 예산으로 서울 어디? — 서울 아파트 실거래가 탐색</title>
+<meta name="description" content="예산과 조건으로 서울 25개 자치구의 아파트 실거래가를 탐색하는 대시보드">
 <link rel="stylesheet" as="style" crossorigin
   href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
-<style>
-  :root {
-    --blue-50: #0066FF;
-    --blue-45: #005EEB;
-    --blue-95: #EAF2FE;
-    --blue-99: #F7FBFF;
-    --neutral-10: #171717;
-    --neutral-30: #474747;
-    --neutral-50: #737373;
-    --neutral-90: #C4C4C4;
-    --neutral-95: #DCDCDC;
-    --neutral-99: #F7F7F7;
-    --white: #FFFFFF;
-    --radius-card: 16px;
-    --radius-sm: 8px;
-    --spacing-unit: 8px;
-  }
-
-  * {
-    box-sizing: border-box;
-  }
-
-  body {
-    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 64px 20px 80px;
-    line-height: 1.6;
-    color: var(--neutral-10);
-    background-color: var(--white);
-  }
-
-  section {
-    margin-bottom: 56px;
-  }
-
-  h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    margin: 0 0 12px;
-    color: var(--neutral-10);
-  }
-
-  h1.section-title {
-    font-size: 1.375rem;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  h1.section-title::before {
-    content: "";
-    display: inline-block;
-    width: 6px;
-    height: 22px;
-    background-color: var(--blue-50);
-    border-radius: 3px;
-  }
-
-  p {
-    font-size: 1rem;
-    color: var(--neutral-30);
-    margin: 0;
-  }
-
-  .intro-card {
-    background-color: var(--blue-99);
-    border: 1px solid var(--blue-95);
-    border-radius: var(--radius-card);
-    padding: 32px;
-  }
-
-  .intro-card h1 {
-    margin-bottom: 12px;
-  }
-
-  .intro-card p {
-    color: var(--neutral-30);
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    border: 1px solid var(--neutral-95);
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-  }
-
-  th, td {
-    padding: 12px 16px;
-    text-align: left;
-    font-size: 0.925rem;
-  }
-
-  th {
-    background-color: var(--neutral-99);
-    color: var(--neutral-30);
-    font-weight: 600;
-    border-bottom: 1px solid var(--neutral-95);
-  }
-
-  td {
-    border-bottom: 1px solid var(--neutral-95);
-    color: var(--neutral-10);
-  }
-
-  tr:last-child td {
-    border-bottom: none;
-  }
-
-  tr:hover td {
-    background-color: var(--blue-99);
-  }
-
-  .highlight {
-    color: var(--blue-50);
-    font-weight: 700;
-  }
-
-  .source-note {
-    font-size: 0.8rem;
-    color: var(--neutral-50);
-    margin-top: 32px;
-  }
-</style>
+<link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
 
-<section class="intro-card">
-  <h1>임정</h1>
-  <p>
-    안녕하세요, 임정입니다.<br>
-    새로운 것을 배우고 만드는 것을 좋아합니다.<br>
-    꾸준히 성장하는 개발자가 되고 싶습니다.
-  </p>
+<header class="topbar">
+  <h1>내 예산으로 서울 어디?</h1>
+  <p>서울시 아파트 실거래가 320,141건(2025.07~2026.06) 기반 · 호가가 아닌 실제 체결 거래만 보여줍니다</p>
+</header>
 
-  <table>
-    <tr>
-      <th>항목</th>
-      <th>설명</th>
-    </tr>
-    <tr>
-      <td>좋아하는 것</td>
-      <td>새로운 기술 배우기, 여행</td>
-    </tr>
-    <tr>
-      <td>요즘 배우는 것</td>
-      <td>웹 개발 (HTML, CSS, JavaScript)</td>
-    </tr>
-    <tr>
-      <td>오늘 목표</td>
-      <td>첫 번째 웹페이지 완성하기</td>
-    </tr>
-  </table>
-</section>
+<main class="layout">
+  <aside class="filters-panel card" id="filters-panel">
+    <h2>필터</h2>
 
-<section>
-  <h1 class="section-title">[노원구] 아파트 실거래 살펴보기</h1>
+    <div class="filter-group">
+      <div class="filter-label">거래유형</div>
+      <div class="segmented" id="deal-type-toggle">
+        <button type="button" data-value="1" class="active">전세</button>
+        <button type="button" data-value="2">월세</button>
+        <button type="button" data-value="0">매매</button>
+      </div>
+    </div>
 
-  <p>
-    서울 아파트 실거래가 데이터를 분석한 결과, 노원구에서 가장 비싸게 팔린 아파트는
-    <span class="highlight">중계동 동진신안(135.0㎡)</span>으로 15억 6,000만원에 거래되었습니다.
-    상위 5건 모두 중계동에 위치한 단지였습니다.
-  </p>
+    <div class="filter-group">
+      <div class="filter-label">
+        <span>예산 (이 금액 이하)</span>
+        <span class="budget-value" id="budget-value">3억</span>
+      </div>
+      <input type="range" id="budget-slider" min="0" max="1000" step="1">
+      <div class="budget-input-row">
+        <input type="number" id="budget-input" min="0" step="0.1">
+        <span>억원</span>
+      </div>
+    </div>
 
-  <table>
-    <tr>
-      <th>순위</th>
-      <th>단지</th>
-      <th>동</th>
-      <th>가격</th>
-      <th>면적</th>
-      <th>층</th>
-      <th>계약일</th>
-    </tr>
-    <tr>
-      <td>1</td>
-      <td>동진신안</td>
-      <td>중계동</td>
-      <td>15.6억원</td>
-      <td>135.0㎡</td>
-      <td>11층</td>
-      <td>2026-05-20</td>
-    </tr>
-    <tr>
-      <td>2</td>
-      <td>대림벽산(363)</td>
-      <td>중계동</td>
-      <td>15.5억원</td>
-      <td>141.7㎡</td>
-      <td>9층</td>
-      <td>2025-07-28</td>
-    </tr>
-    <tr>
-      <td>3</td>
-      <td>동진신안</td>
-      <td>중계동</td>
-      <td>15.4억원</td>
-      <td>135.0㎡</td>
-      <td>5층</td>
-      <td>2025-09-29</td>
-    </tr>
-    <tr>
-      <td>4</td>
-      <td>동진신안</td>
-      <td>중계동</td>
-      <td>15.3억원</td>
-      <td>135.0㎡</td>
-      <td>13층</td>
-      <td>2025-09-12</td>
-    </tr>
-    <tr>
-      <td>5</td>
-      <td>동진신안</td>
-      <td>중계동</td>
-      <td>15.2억원</td>
-      <td>135.0㎡</td>
-      <td>6층</td>
-      <td>2026-04-06</td>
-    </tr>
-  </table>
+    <div class="filter-group">
+      <div class="filter-label">
+        <span>면적 (평)</span>
+        <span class="area-value" id="area-value">전체</span>
+      </div>
+      <div class="range-dual">
+        <div class="range-track"></div>
+        <div class="range-track-fill" id="area-track-fill"></div>
+        <input type="range" id="area-min-slider" min="3" max="97" step="1" value="3">
+        <input type="range" id="area-max-slider" min="3" max="97" step="1" value="97">
+      </div>
+    </div>
 
-  <p class="source-note">
-    데이터: 서울열린데이터광장 서울시 부동산 실거래가 정보(OA-21275), 2026년 상반기 아파트 계약 기준
-  </p>
-</section>
+    <div class="filter-group">
+      <div class="filter-label">자치구 <span id="gu-selected-count"></span></div>
+      <div class="chip-list" id="gu-chip-list">
+        <button type="button" class="chip chip-all active" data-code="">전체</button>
+      </div>
+    </div>
 
+    <div class="filter-group">
+      <div class="filter-label">거래 시점</div>
+      <div class="segmented" id="period-toggle">
+        <button type="button" data-value="3">최근 3개월</button>
+        <button type="button" data-value="6">최근 6개월</button>
+        <button type="button" data-value="12" class="active">전체 12개월</button>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-label">층수</div>
+      <label class="checkbox-row">
+        <input type="checkbox" id="floor-exclude-checkbox">
+        1층·반지하 제외
+      </label>
+    </div>
+
+    <div class="filter-group">
+      <button type="button" class="reset-btn" id="reset-filters">필터 초기화</button>
+    </div>
+  </aside>
+
+  <section class="content">
+    <div class="card map-card">
+      <h2>서울 지도</h2>
+      <div class="map-toolbar">
+        <div class="map-toggle" id="map-metric-toggle">
+          <button type="button" data-value="count" class="active">가능 매물 수</button>
+          <button type="button" data-value="median">시세 중앙값</button>
+        </div>
+        <div id="map-loading-note" style="font-size:0.75rem;color:var(--neutral-50);"></div>
+      </div>
+      <div class="map-wrap">
+        <svg id="seoul-map" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <div class="legend" id="map-legend"></div>
+    </div>
+
+    <div class="card summary-card" id="summary-card">
+      <h2>요약</h2>
+      <div id="summary-body"></div>
+    </div>
+
+    <div class="card list-card">
+      <div class="list-header">
+        <div class="list-count" id="list-count">조건에 맞는 거래를 불러오는 중...</div>
+        <select class="sort-select" id="sort-select">
+          <option value="priceAsc">금액 낮은순</option>
+          <option value="priceDesc">금액 높은순</option>
+          <option value="dateDesc">최신순</option>
+          <option value="areaDesc">면적 넓은순</option>
+        </select>
+      </div>
+      <div class="list-body" id="list-body">
+        <div class="list-loading">실거래 데이터를 불러오는 중입니다...</div>
+      </div>
+      <div class="pagination" id="pagination"></div>
+    </div>
+  </section>
+</main>
+
+<div class="map-tooltip hidden" id="map-tooltip"></div>
+
+<footer class="app-footer">
+  데이터 출처: 서울열린데이터광장 서울시 부동산 실거래가 정보(OA-21275) · 2025.07~2026.06 · 호가·광고가 아닌 실제 체결 거래
+</footer>
+
+<script src="assets/app.js"></script>
 </body>
 </html>
